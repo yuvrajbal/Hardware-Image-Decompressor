@@ -6,7 +6,6 @@ Ontario, Canada
 */
 
 `timescale 1ns/100ps
-`default_nettype none
 
 `include "define_state.h"
 
@@ -158,7 +157,7 @@ SRAM_controller SRAM_unit (
 	.SRAM_CE_N_O(SRAM_CE_N_O),
 	.SRAM_OE_N_O(SRAM_OE_N_O)
 );
-
+/*
 // Milestone 1 Unit
 m1 m1_unit (
 	.CLOCK_50_I(CLOCK_50_I),
@@ -170,7 +169,7 @@ m1 m1_unit (
 	.SRAM_write_data(m1_SRAM_write_data),
 	.m1_end(m1_end)	
 );
-
+*/
 assign SRAM_ADDRESS_O[19:18] = 2'b00;
 
 always @(posedge CLOCK_50_I or negedge resetn) begin

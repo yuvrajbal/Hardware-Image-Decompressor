@@ -7,7 +7,6 @@ Ontario, Canada
 
 
 `timescale 1ns/100ps
-`default_nettype none
 
 `include "define_state.h"
 
@@ -526,4 +525,6 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 		endcase
 	end
 end
+
+
 endmodule
