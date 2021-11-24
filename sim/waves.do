@@ -31,3 +31,50 @@ add wave -hex UUT/VGA_unit/VGA_red
 add wave -hex UUT/VGA_unit/VGA_green
 add wave -hex UUT/VGA_unit/VGA_blue
 
+add wave -divider -height 10 {General signals}
+add wave -hex UUT/m1_unit/state
+add wave -hex UUT/m1_unit/col_counter
+
+add wave -divider -height 10 {Multiplication signals}
+add wave -dec UUT/m1_unit/Multi_op_1_1
+add wave -dec UUT/m1_unit/Multi_op_1_2
+add wave -dec UUT/m1_unit/Multi_op_2_1
+add wave -dec UUT/m1_unit/Multi_op_2_2
+add wave -dec UUT/m1_unit/Multi_result_long1
+add wave -dec UUT/m1_unit/Multi_result_long2
+
+
+add wave -divider -height 10 {Y signals}
+add wave -dec UUT/m1_unit/Y_address
+add wave -dec UUT/m1_unit/Y_even
+add wave -dec UUT/m1_unit/Y_odd
+
+add wave -divider -height 10 {U signals}
+add wave -dec UUT/m1_unit/U_address
+add wave -dec UUT/m1_unit/U_even
+add wave -dec UUT/m1_unit/U_odd
+add wave -dec UUT/m1_unit/U_shift
+add wave -dec UUT/m1_unit/U_odd_accum
+
+add wave -divider -height 10 {V signals}
+add wave -dec UUT/m1_unit/V_address
+add wave -dec UUT/m1_unit/V_even
+add wave -dec UUT/m1_unit/V_odd
+add wave -dec UUT/m1_unit/V_shift
+add wave -dec UUT/m1_unit/V_odd_accum
+
+add wave -divider -height 10 {RGB signals}
+add wave -dec UUT/m1_unit/RGB_address
+add wave -dec UUT/m1_unit/RGB_red
+add wave -dec UUT/m1_unit/RGB_green
+add wave -dec UUT/m1_unit/RGB_green_buf
+add wave -dec UUT/m1_unit/RGB_blue
+add wave -dec UUT/m1_unit/RGB_blue_buf
+
+
+
+
+
+
+
+

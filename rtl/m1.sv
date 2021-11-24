@@ -50,26 +50,21 @@ logic [15:0] Y_odd;
 logic [15:0] U_address;
 logic [15:0] U_even;
 logic [7:0] U_odd;
-logic [15:0] U_even_buf;
-logic [15:0] U_odd_buf;
 logic [47:0] U_shift;
-logic signed [31:0] U_even_accum;
 logic signed [31:0] U_odd_accum;
 
 //V
 logic [15:0] V_address;
 logic [15:0] V_even;
 logic [7:0] V_odd;
-logic [15:0] V_even_buf;
-logic [15:0] V_odd_buf;
 logic [47:0] V_shift;
-logic signed [31:0] V_even_accum;
 logic signed [31:0] V_odd_accum;
 
 //RGB
 logic [17:0] RGB_address;
 logic signed [31:0] RGB_red; //need to change to 8 bit in future 
 logic signed [31:0] RGB_green;
+logic signed [31:0] RGB_green_buf;
 logic signed [31:0] RGB_blue;
 logic signed [31:0] RGB_blue_buf;
 
@@ -77,17 +72,15 @@ logic signed [31:0] RGB_blue_buf;
 //Multiplier 1
 logic [31:0] Multi_op_1_1, Multi_op_1_2, Multi_result1;
 logic signed [31:0] Multi_result_long1;
-logic signed [31:0] Multi_1_buf;
 
 //Multipler 2
 logic [31:0] Multi_op_2_1, Multi_op_2_2, Multi_result2;
 logic signed [31:0] Multi_result_long2;
-logic signed [31:0] Multi_2_buf;
 
 assign Multi_result_long1 = Multi_op_1_1 * Multi_op_1_2;
 assign Multi_result_long2 = Multi_op_2_1 * Multi_op_2_2;
 
-//Column and Row Counter
+//Column Counter
 logic [7:0] col_counter;
 
 //Multiplications
@@ -195,7 +188,7 @@ always_comb begin
 			Multi_op_1_1 = CSC_132251;
 			Multi_op_1_2 = U_shift[31:24] - 8'd128;
 			Multi_op_2_1 = CSC_25624;
-			Multi_op_2_2 = U_odd_accum- 8'd128;		// U’ODD 
+			Multi_op_2_2 = U_odd_accum - 8'd128;		// U’ODD 
 		end
 
 		S_COMMON_13: begin
@@ -226,19 +219,33 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 		state <= S_M1_IDLE;
 		SRAM_we_n <= 1'b1;
 		SRAM_address <= 18'd0;
+		SRAM_write_data <= 16'd0;
 		col_counter <= 8'd0;
 		Y_address <= 16'd0;
 		Y_even <= 16'd0;
 		Y_odd <= 16'd0;
 		m1_end <= 1'b0;
-		
+		U_address <= 16'd0;
+		V_address <= 16'd0;
+		U_even <= 16'd0;
+		U_odd <= 8'd0;
+		U_odd_accum <= 32'd0;
+		V_odd_accum <= 32'd0;
+		U_shift <= 48'd0;
+		V_shift <= 48'd0;
+		RGB_red <= 32'b0;
+		RGB_green <= 32'b0;
+		RGB_green_buf <= 32'b0;
+		RGB_blue <= 32'b0;
+		RGB_blue_buf <= 32'b0;
+		RGB_address <= 18'b0;
 		
 	end else begin
 	
 		case(state)
 						
 			S_M1_IDLE: begin
-			if(m1_start == 0)
+			if(m1_start == 1)
 				state <=S_LEAD_IN_0;	
 			end
 			
@@ -276,7 +283,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end 
 			
 			S_LEAD_IN_4: begin							          
-                                 SRAM_address <= Y_address + Y_OFFSET; 		//Y0,Y1
+         SRAM_address <= Y_address + Y_OFFSET; 		//Y0,Y1
 			Y_address <= Y_address + 16'd1;			//increment y address
 			V_even <= SRAM_read_data[15:8]; 			//V0
 			V_odd <= SRAM_read_data[7:0]; 			//V1
@@ -341,7 +348,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 				V_address <= V_address + 16'd1;			//increment V add value by 1
 			end
 
-			RGB_red <= $signed(Multi_result_long1 + Multi_result_long2) >> 16; //76284+104595
+			RGB_red <= $signed(Multi_result_long1 + Multi_result_long2) >>> 16; //76284+104595
 			RGB_green <= Multi_result_long1;			 //76284
 			RGB_blue <= Multi_result_long1;			//76284
 
@@ -352,8 +359,8 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 
 			SRAM_address <= Y_address + Y_OFFSET;		//location 1 (Y2,Y3)
 			Y_address <= Y_address + 16'd1;			//increment Y add value by 1
-			RGB_green <= $signed(RGB_green - Multi_result_long1 - Multi_result_long2) >> 16;//store green pixel value
-			SRAM_we_n <= 1'd0;				//write in next clock cycle
+			RGB_green <= $signed(RGB_green - Multi_result_long1 - Multi_result_long2) >>> 16;//store green pixel value
+			SRAM_we_n <= 1'd1;				//write in next clock cycle
 		
 			state <= S_COMMON_4;				
 			end
@@ -373,10 +380,10 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			
 			SRAM_address <= RGB_address + RGB_OFFSET;	//Move to RGB segment to write 
 			RGB_address <= RGB_address + 18'd1;		 //Increment address 
-			SRAM_write_data <= {(RGB_red[31] ? 8'd0: | RGB_red[30:24] ? 8'd255: RGB_red[23:16]), (RGB_green[31] ? 8'd0: | RGB_green[30:24] ? 8'd255: RGB_green[23:16])}; 		//R0G0
+			
 			RGB_blue <= $signed(RGB_blue + Multi_result_long1) >>> 16; 	//B0
-			RGB_green <= Multi_result_long2;			//Next green px partial value
-			SRAM_we_n <= 1'd1;				//no write in next cycle
+			RGB_green_buf <= Multi_result_long2;			//Next green px partial value
+			SRAM_we_n <= 1'd0;				//no write in next cycle
 
 			state <= S_COMMON_5;
 			end
@@ -394,10 +401,12 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			V_shift [7:0] <= V_odd;	//159	//add new value in LSB
 			end
 			
+			SRAM_write_data <= {(RGB_red[31] ? 8'd0: | RGB_red[30:24] ? 8'd255: RGB_red[23:16]), (RGB_green[31] ? 8'd0: | RGB_green[30:24] ? 8'd255: RGB_green[23:16])}; 		//R0G0
+			
 			SRAM_address <= RGB_address + RGB_OFFSET;	//move to Beven   /Rodd
 			RGB_address <= RGB_address + 18'd1;		//inc RGB address		
 			RGB_red <= $signed(Multi_result_long1 + Multi_result_long2); 	//R1
-			RGB_green <= $signed(Multi_result_long1 - RGB_green);		//partial g sum
+			RGB_green <= $signed(Multi_result_long1 - RGB_green_buf);		//partial g sum
 			RGB_blue_buf <= Multi_result_long1; //need to buffer here, 76284*yodd
 			SRAM_we_n <= 1'd0;
 			
@@ -455,7 +464,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			SRAM_address <= Y_address + Y_OFFSET;		//location 2 (Y4,Y5)
 			Y_address <= Y_address + 16'd1;			//increment Y add value by 1
 			RGB_green <= $signed(RGB_green - Multi_result_long1 - Multi_result_long2) >>> 16;//store green pixel value
-			SRAM_we_n <= 1'd0;				//write in next clock cycle
+			SRAM_we_n <= 1'd1;				//write in next clock cycle
 		
 			state <= S_COMMON_12;				
 			end
@@ -466,10 +475,10 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			U_shift [7:0] <= U_odd;				//add new value in LSB
 			SRAM_address <= RGB_address + RGB_OFFSET;	//Move to RGB segment to write 
 			RGB_address <= RGB_address + 18'd1;		 //Increment address 
-			SRAM_write_data <= {(RGB_red[31] ? 8'd0: | RGB_red[30:24] ? 8'd255: RGB_red[23:16]), (RGB_green[31] ? 8'd0: | RGB_green[30:24] ? 8'd255: RGB_green[23:16])}; 		//RevenGeven(R2G2)
+			
 			RGB_blue <= $signed(RGB_blue + Multi_result_long1) >> 16; 	//B0
-			RGB_green <= Multi_result_long2;			//Next green px partial value
-			SRAM_we_n <= 1'd1;				//no write in next cycle
+			RGB_green_buf <= Multi_result_long2;			//Next green px partial value
+			SRAM_we_n <= 1'd0;				//no write in next cycle
 
 			state <= S_COMMON_13;
 			end
@@ -478,11 +487,13 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 
 			V_shift  <= (V_shift << 18'd8);				//shift one value
 			V_shift [7:0] <= V_odd;		//add new value in LSB
-
+			
+			SRAM_write_data <= {(RGB_red[31] ? 8'd0: | RGB_red[30:24] ? 8'd255: RGB_red[23:16]), (RGB_green[31] ? 8'd0: | RGB_green[30:24] ? 8'd255: RGB_green[23:16])}; 		//RevenGeven(R2G2)
+			
 			SRAM_address <= RGB_address + RGB_OFFSET;	//move to Beven   /Rodd
 			RGB_address <= RGB_address + 18'd1;		//inc RGB address	
 			RGB_red <= $signed(Multi_result_long1 + Multi_result_long2); 	//R3
-			RGB_green <= $signed(Multi_result_long1 - RGB_green);		//partial g sum
+			RGB_green <= $signed(Multi_result_long1 - RGB_green_buf);		//partial g sum
 			RGB_blue_buf <= Multi_result_long1; //need to buffer here, 76284*yodd
 			SRAM_we_n <= 1'd0;
 			state <= S_COMMON_14;
