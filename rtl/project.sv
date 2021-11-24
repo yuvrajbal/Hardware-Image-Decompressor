@@ -6,9 +6,7 @@ Ontario, Canada
 */
 
 `timescale 1ns/100ps
-`ifndef DISABLE_DEFAULT_NET
 `default_nettype none
-`endif
 
 `include "define_state.h"
 
@@ -22,6 +20,7 @@ module project (
 		/////// pushbuttons/switches              ////////////
 		input logic[3:0] PUSH_BUTTON_N_I,         // pushbuttons
 		input logic[17:0] SWITCH_I,               // toggle switches
+		
 
 		/////// 7 segment displays/LEDs           ////////////
 		output logic[6:0] SEVEN_SEGMENT_N_O[7:0], // 8 seven segment displays
@@ -79,6 +78,13 @@ logic UART_SRAM_we_n;
 logic [25:0] UART_timer;
 
 logic [6:0] value_7_segment [7:0];
+
+// For Milestone 1
+logic m1_start;
+logic m1_end;
+logic [17:0] m1_SRAM_address;
+logic [15:0] m1_SRAM_write_data;
+logic m1_SRAM_we_n;
 
 // For error detection in UART
 logic Frame_error;
@@ -153,6 +159,18 @@ SRAM_controller SRAM_unit (
 	.SRAM_OE_N_O(SRAM_OE_N_O)
 );
 
+// Milestone 1 Unit
+m1 m1_unit (
+	.CLOCK_50_I(CLOCK_50_I),
+	.resetn(resetn),
+	.m1_start(m1_start),
+	.SRAM_address(m1_SRAM_address),
+	.SRAM_read_data(SRAM_read_data),
+	.SRAM_we_n(m1_SRAM_we_n),
+	.SRAM_write_data(m1_SRAM_write_data),
+	.m1_end(m1_end)	
+);
+
 assign SRAM_ADDRESS_O[19:18] = 2'b00;
 
 always @(posedge CLOCK_50_I or negedge resetn) begin
@@ -162,7 +180,7 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 		UART_rx_initialize <= 1'b0;
 		UART_rx_enable <= 1'b0;
 		UART_timer <= 26'd0;
-		
+		m1_start <= 1'b0;
 		VGA_enable <= 1'b1;
 	end else begin
 
@@ -178,6 +196,7 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 				UART_rx_initialize <= 1'b1;
 				UART_timer <= 26'd0;
 				VGA_enable <= 1'b0;
+				m1_start <= 1'b0;
 				top_state <= S_UART_RX;
 			end
 		end
@@ -198,11 +217,20 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 
 			// Timeout for 1 sec on UART (detect if file transmission is finished)
 			if (UART_timer == 26'd49999999) begin
-				top_state <= S_IDLE;
+				top_state <= S_M1;
 				UART_timer <= 26'd0;
 			end
 		end
-
+		
+		S_M1: begin
+			m1_start <= 1'b1;
+			if(m1_end == 1) begin
+				m1_start <= 1'b0;
+				VGA_enable <= 1'b1; 
+				top_state <= S_IDLE;
+			end
+		end
+		
 		default: top_state <= S_IDLE;
 
 		endcase
@@ -215,11 +243,11 @@ end
 assign VGA_base_address = 18'd0;
 
 // Give access to SRAM for UART and VGA at appropriate time
-assign SRAM_address = (top_state == S_UART_RX) ? UART_SRAM_address : VGA_SRAM_address;
+assign SRAM_address = (top_state == S_UART_RX) ? UART_SRAM_address : (top_state == S_M1) ? m1_SRAM_address : VGA_SRAM_address;
 
-assign SRAM_write_data = (top_state == S_UART_RX) ? UART_SRAM_write_data : 16'd0;
+assign SRAM_write_data = (top_state == S_M1) ? m1_SRAM_write_data : UART_SRAM_write_data;
 
-assign SRAM_we_n = (top_state == S_UART_RX) ? UART_SRAM_we_n : 1'b1;
+assign SRAM_we_n = (top_state == S_UART_RX) ? UART_SRAM_we_n : (top_state == S_M1) ? m1_SRAM_we_n : 1'b1;
 
 // 7 segment displays
 convert_hex_to_seven_segment unit7 (

@@ -220,7 +220,7 @@ module TB;
 	endtask
 
 	initial begin
-                $timeformat(-6, 2, "us", 10);
+      $timeformat(-6, 2, "us", 10);
 		clock_50 = 1'b0;
 		uart_rx = 1'b1;
 		switch[17:0] = 18'd0;

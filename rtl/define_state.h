@@ -1,9 +1,10 @@
 `ifndef DEFINE_STATE
 
 // for top state - we have more states than needed
-typedef enum logic [1:0] {
+typedef enum logic [2:0] {
 	S_IDLE,
-	S_UART_RX
+	S_UART_RX,
+	S_M1
 } top_state_type;
 
 typedef enum logic [1:0] {
@@ -35,6 +36,36 @@ typedef enum logic [3:0] {
 	S_VS_FETCH_PIXEL_DATA_2,
 	S_VS_FETCH_PIXEL_DATA_3
 } VGA_SRAM_state_type;
+
+typedef enum logic [6:0] {
+	S_M1_IDLE,
+	S_LEAD_IN_0,
+	S_LEAD_IN_1,
+	S_LEAD_IN_2,
+	S_LEAD_IN_3,
+	S_LEAD_IN_4,
+	S_LEAD_IN_5,
+	S_LEAD_IN_6,
+	S_LEAD_IN_7,
+	S_COMMON_0,
+	S_COMMON_1,
+	S_COMMON_2,
+	S_COMMON_3,
+	S_COMMON_4,
+	S_COMMON_5,
+	S_COMMON_6,
+	S_COMMON_7,
+	S_COMMON_8,
+	S_COMMON_9,
+	S_COMMON_10,
+	S_COMMON_11,
+	S_COMMON_12,
+	S_COMMON_13,
+	S_COMMON_14,
+	S_COMMON_15,
+	S_DONE
+} m1_state_type;
+	
 
 parameter 
    VIEW_AREA_LEFT = 160,
