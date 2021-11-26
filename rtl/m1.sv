@@ -285,7 +285,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			
 			state <= S_LEAD_IN_4;
 			end 
-			
+			 
 			S_LEAD_IN_4: begin							          
          SRAM_address <= Y_address + Y_OFFSET; 		//Y0,Y1
 			Y_address <= Y_address + 16'd1;			//increment y address
