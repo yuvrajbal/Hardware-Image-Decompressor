@@ -183,7 +183,7 @@ always_comb begin
 			Multi_op_1_1 = CSC_25624;			//Operand for G pixel 
 			Multi_op_1_2 = U_shift[31:24] - 8'd128;		//REPLACEd WITH UPSAMPLED VALUES (U’) 
 			Multi_op_2_1 = CSC_53281;
-			Multi_op_2_2 = V_shift[15:8]- 8'd128;		//REPLACEd WITH UPSAMPLED VALUES (V’) 
+			Multi_op_2_2 = V_shift[31:24]- 8'd128;		//REPLACEd WITH UPSAMPLED VALUES (V’) 
 	
 		end
 		
@@ -191,7 +191,7 @@ always_comb begin
 			Multi_op_1_1 = CSC_132251;
 			Multi_op_1_2 = U_shift[31:24] - 8'd128;
 			Multi_op_2_1 = CSC_25624;
-			Multi_op_2_2 = U_odd_accum - 8'd128;		// U’ODD 
+			Multi_op_2_2 = U_odd_accum2 - 8'd128;		// U’ODD 
 		end
 
 		S_COMMON_13: begin
