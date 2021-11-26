@@ -62,10 +62,12 @@ add wave -dec UUT/m1_unit/V_even
 add wave -dec UUT/m1_unit/V_odd
 add wave -dec UUT/m1_unit/V_shift
 add wave -dec UUT/m1_unit/V_odd_accum
+add wave -dec UUT/m1_unit/V_odd_accum2
 
 add wave -divider -height 10 {RGB signals}
 add wave -dec UUT/m1_unit/RGB_address
 add wave -dec UUT/m1_unit/RGB_red
+add wave -dec UUT/m1_unit/RGB_red_buf
 add wave -dec UUT/m1_unit/RGB_green
 add wave -dec UUT/m1_unit/RGB_green_buf
 add wave -dec UUT/m1_unit/RGB_blue
