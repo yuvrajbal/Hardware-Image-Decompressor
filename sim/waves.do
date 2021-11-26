@@ -33,7 +33,7 @@ add wave -hex UUT/VGA_unit/VGA_blue
 
 add wave -divider -height 10 {General signals}
 add wave -hex UUT/m1_unit/state
-add wave -hex UUT/m1_unit/col_counter
+add wave -dec UUT/m1_unit/col_counter
 
 add wave -divider -height 10 {Multiplication signals}
 add wave -dec UUT/m1_unit/Multi_op_1_1

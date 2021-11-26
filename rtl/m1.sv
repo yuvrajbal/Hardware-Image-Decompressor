@@ -84,7 +84,7 @@ assign Multi_result_long1 = Multi_op_1_1 * Multi_op_1_2;
 assign Multi_result_long2 = Multi_op_2_1 * Multi_op_2_2;
 
 //Column Counter
-logic [7:0] col_counter;
+logic [8:0] col_counter;
 
 //Multiplications
 always_comb begin
@@ -223,7 +223,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 		SRAM_we_n <= 1'b1;
 		SRAM_address <= 18'd0;
 		SRAM_write_data <= 16'd0;
-		col_counter <= 8'd0;
+		col_counter <= 9'd0;
 		Y_address <= 16'd0;
 		Y_even <= 16'd0;
 		Y_odd <= 16'd0;
@@ -254,7 +254,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end
 			
 			S_LEAD_IN_0: begin
-			col_counter <= 8'd0;
+			col_counter <= 9'd0;
 			SRAM_we_n <= 1'b1;
 			SRAM_address <= U_address + U_OFFSET;		//location 38400(U0,U1)
 			U_address <= U_address + 16'd1;			//move to next address , U2,U3
@@ -328,7 +328,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end	
 			
 			S_COMMON_0: begin
-			col_counter <= col_counter + 1'd1;
+			col_counter <= col_counter + 9'd1;
 			SRAM_we_n <= 1'd1;	
 			
 			U_odd_accum <= $signed(U_odd_accum - Multi_result_long1);	// 21(U0 + U3) - 52(U0 + U2) 
@@ -337,7 +337,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end
 			
 			S_COMMON_1: begin
-			if (col_counter < 8'd156) begin
+			if (col_counter < 9'd78) begin
 				SRAM_address <= U_address + U_OFFSET;		//location 38402(U4,U5)
 				U_address <= U_address + 16'd1;			//increment U add value by 1
 			end
@@ -348,7 +348,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end
 			
 			S_COMMON_2: begin
-			if(col_counter < 8'd156) begin
+			if(col_counter < 9'd78) begin
 				SRAM_address <= V_address + V_OFFSET;		//location 57600(V4,V5)
 				V_address <= V_address + 16'd1;			//increment V add value by 1
 			end
@@ -371,7 +371,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end
 			
 			S_COMMON_4: begin
-			if(col_counter < 8'd156) begin
+			if(col_counter < 9'd78) begin
 				U_even <=  SRAM_read_data[15:8]; 			//Buffer U4
 				U_odd   <=  SRAM_read_data[7:0];				 //BUffer U5
 				U_shift[47:40] <= U_shift[39:32];			 //U0	
@@ -407,7 +407,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end
 			
 			S_COMMON_5: begin
-			if(col_counter < 8'd156) begin
+			if(col_counter < 8'd78) begin
 				V_even <=  SRAM_read_data[15:8]; 			// Buffer V4
 				V_odd		<=  SRAM_read_data[7:0]; 			//V5
 				V_shift[47:40] <= V_shift[39:32];			 //U0	
@@ -575,11 +575,15 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			U_odd_accum <= Multi_result_long1;			// 21(U0 + U5)
 			V_odd_accum <=  Multi_result_long2;			// 21(V0 + V5)
 			SRAM_we_n <= 1'd0;	
-				if (col_counter == 8'd157 ) begin
+				if (col_counter == 9'd80) begin
+				
 					if ((RGB_address + RGB_OFFSET) == 18'd262143) begin
 						m1_end <= 1'b1;
 						state <= S_M1_IDLE;
+						
 					end else begin
+						U_address <= U_address + 16'd1;
+						V_address <= V_address + 16'd1;
 						state <= S_LEAD_IN_0;
 					end
 				
