@@ -55,6 +55,8 @@ add wave -dec UUT/m1_unit/U_even
 add wave -dec UUT/m1_unit/U_odd
 add wave -dec UUT/m1_unit/U_shift
 add wave -dec UUT/m1_unit/U_odd_accum
+add wave -dec UUT/m1_unit/U_odd_accum2
+
 
 add wave -divider -height 10 {V signals}
 add wave -dec UUT/m1_unit/V_address
