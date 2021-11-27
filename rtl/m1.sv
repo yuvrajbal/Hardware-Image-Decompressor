@@ -337,7 +337,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end
 			
 			S_COMMON_1: begin
-			if (col_counter < 9'd78) begin
+			if (col_counter < 9'd79) begin
 				SRAM_address <= U_address + U_OFFSET;		//location 38402(U4,U5)
 				U_address <= U_address + 16'd1;			//increment U add value by 1
 			end
@@ -348,7 +348,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end
 			
 			S_COMMON_2: begin
-			if(col_counter < 9'd78) begin
+			if(col_counter < 9'd79) begin
 				SRAM_address <= V_address + V_OFFSET;		//location 57600(V4,V5)
 				V_address <= V_address + 16'd1;			//increment V add value by 1
 			end
@@ -371,7 +371,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end
 			
 			S_COMMON_4: begin
-			if(col_counter < 9'd78) begin
+			if(col_counter < 9'd79) begin
 				U_even <=  SRAM_read_data[15:8]; 			//Buffer U4
 				U_odd   <=  SRAM_read_data[7:0];				 //BUffer U5
 				U_shift[47:40] <= U_shift[39:32];			 //U0	
@@ -407,7 +407,7 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			end
 			
 			S_COMMON_5: begin
-			if(col_counter < 8'd78) begin
+			if(col_counter < 8'd79) begin
 				V_even <=  SRAM_read_data[15:8]; 			// Buffer V4
 				V_odd		<=  SRAM_read_data[7:0]; 			//V5
 				V_shift[47:40] <= V_shift[39:32];			 //U0	
@@ -506,11 +506,20 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			S_COMMON_11: begin
 
 			SRAM_address <= Y_address + Y_OFFSET;		//location 2 (Y4,Y5)
-			Y_address <= Y_address + 16'd1;			//increment Y add value by 1
+			
+			
+			
+			
 			RGB_green <= $signed(RGB_green - Multi_result_long1 - Multi_result_long2) >> 16;//store green pixel value
 			SRAM_we_n <= 1'd1;				//write in next clock cycle
-		
-			state <= S_COMMON_12;				
+			
+			if(col_counter == 9'd80)begin
+			
+			end 
+			else begin
+				Y_address <= Y_address + 16'd1;			//increment Y add value by 1					
+			end
+			state <= S_COMMON_12;
 			end
 			
 			S_COMMON_12: begin
@@ -582,14 +591,40 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 						state <= S_M1_IDLE;
 						
 					end else begin
-						U_address <= U_address + 16'd1;
-						V_address <= V_address + 16'd1;
-						state <= S_LEAD_IN_0;
+						//U_address <= U_address + 16'd1;
+						//V_address <= V_address + 16'd1;
+						//state <= S_LEAD_IN_0;
+						state <= S_LEAD_OUT_0;	
 					end
 				
 				end else
 					state <=  S_COMMON_0;
 			end
+			
+			S_LEAD_OUT_0:begin 
+				SRAM_we_n <= 1'b1;	
+				col_counter <= 9'd0;
+				
+				//SRAM_address <= U_address + U_OFFSET;		//location 38480(U160,U161)
+				//U_address <= U_address + 16'd1;			//move to next address , U162,U163
+				state <= S_LEAD_OUT_1;
+			end 
+			
+			S_LEAD_OUT_1:begin 
+				state<= S_LEAD_OUT_2;
+			end
+			
+			S_LEAD_OUT_2:begin
+				state <= S_LEAD_OUT_3;
+			end
+			
+			S_LEAD_OUT_3:begin
+			state <= S_LEAD_IN_0;
+			end 
+			
+			
+			
+			
 			
 			default: state <= S_M1_IDLE;
 			

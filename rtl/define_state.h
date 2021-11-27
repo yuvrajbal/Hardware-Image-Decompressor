@@ -63,6 +63,10 @@ typedef enum logic [6:0] {
 	S_COMMON_13,
 	S_COMMON_14,
 	S_COMMON_15,
+	S_LEAD_OUT_0,
+	S_LEAD_OUT_1,
+	S_LEAD_OUT_2,
+	S_LEAD_OUT_3,
 	S_DONE
 } m1_state_type;
 	
