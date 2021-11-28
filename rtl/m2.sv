@@ -44,7 +44,7 @@ dual_port_RAM0 RAM_inst0(
 	);
 	
 // instantiate RAM1
-dual_port_RAM1 RAM_inst1(
+dual_port_RAM0 RAM_inst1(
 	.address_a ( address_a[1] ),
 	.address_b ( address_b[1] ),
 	.clock ( CLOCK_50_I ),
