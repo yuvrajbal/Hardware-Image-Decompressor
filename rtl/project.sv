@@ -85,6 +85,13 @@ logic [17:0] m1_SRAM_address;
 logic [15:0] m1_SRAM_write_data;
 logic m1_SRAM_we_n;
 
+//For Milestone 2
+logic m2_start;
+logic m2_end;
+logic [17:0] m2_SRAM_address;
+logic [15:0] m2_SRAM_write_data;
+logic m2_SRAM_we_n;
+
 // For error detection in UART
 logic Frame_error;
 
@@ -170,6 +177,18 @@ m1 m1_unit (
 	.m1_end(m1_end)	
 );
 
+// Milestone 2 Unit
+m2 m2_unit (
+	.CLOCK_50_I(CLOCK_50_I),
+	.resetn(resetn),
+	.m2_start(m2_start),
+	.SRAM_address(m2_SRAM_address),
+	.SRAM_read_data(SRAM_read_data),
+	.SRAM_we_n(m2_SRAM_we_n),
+	.SRAM_write_data(m2_SRAM_write_data),
+	.m2_end(m2_end)	
+);
+
 assign SRAM_ADDRESS_O[19:18] = 2'b00;
 
 always @(posedge CLOCK_50_I or negedge resetn) begin
@@ -216,8 +235,16 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 
 			// Timeout for 1 sec on UART (detect if file transmission is finished)
 			if (UART_timer == 26'd49999999) begin
-				top_state <= S_M1;
+				top_state <= S_M2;
 				UART_timer <= 26'd0;
+			end
+		end
+		
+		S_M2: begin
+			m2_start <= 1'b1;
+			if(m2_end == 1) begin
+				m1_start <= 1'b1;
+				top_state <= S_M1;
 			end
 		end
 		
@@ -242,11 +269,11 @@ end
 assign VGA_base_address = 18'd146944;
 
 // Give access to SRAM for UART and VGA at appropriate time
-assign SRAM_address = (top_state == S_UART_RX) ? UART_SRAM_address : (top_state == S_M1) ? m1_SRAM_address : VGA_SRAM_address;
+assign SRAM_address = (top_state == S_UART_RX) ? UART_SRAM_address : (top_state == S_M1) ? m1_SRAM_address : (top_state == S_M2) ? m2_SRAM_address : VGA_SRAM_address;
 
-assign SRAM_write_data = (top_state == S_M1) ? m1_SRAM_write_data : UART_SRAM_write_data;
+assign SRAM_write_data = (top_state == S_M1) ? m1_SRAM_write_data : (top_state == S_M2) ? m2_SRAM_write_data : UART_SRAM_write_data;
 
-assign SRAM_we_n = (top_state == S_UART_RX) ? UART_SRAM_we_n : (top_state == S_M1) ? m1_SRAM_we_n : 1'b1;
+assign SRAM_we_n = (top_state == S_UART_RX) ? UART_SRAM_we_n : (top_state == S_M1) ? m1_SRAM_we_n : (top_state == S_M2) ? m2_SRAM_we_n : 1'b1;
 
 // 7 segment displays
 convert_hex_to_seven_segment unit7 (

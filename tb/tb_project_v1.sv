@@ -33,7 +33,7 @@ has been done in the project and the R/G/B data is displayed on the screen.
 `define INPUT_FILE_NAME "../data/motorcycle.sram_d1"
 
 // input file for milestone 2
-//`define INPUT_FILE_NAME "../data/motorcycle.sram_d2"
+`define INPUT_FILE_NAME "../data/motorcycle.sram_d2"
 
 // input file for milestone 3 (full project)
 //`define INPUT_FILE_NAME "../data/motorcycle.mic15"

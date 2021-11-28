@@ -4,7 +4,8 @@
 typedef enum logic [2:0] {
 	S_IDLE,
 	S_UART_RX,
-	S_M1
+	S_M1,
+	S_M2
 } top_state_type;
 
 typedef enum logic [1:0] {
@@ -69,6 +70,11 @@ typedef enum logic [6:0] {
 	S_LEAD_OUT_3,
 	S_DONE
 } m1_state_type;
+
+
+typedef enum logic [6:0] {
+	S_M2_IDLE
+} m2_state_type;
 	
 
 parameter 
