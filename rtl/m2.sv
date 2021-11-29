@@ -21,6 +21,12 @@ module m2 (
 	output logic m2_end
 );
 
+parameter Y_OFFSET = 18'd76800,
+		  U_OFFSET = 18'd38400,
+		  V_OFFSET = 18'd57600,
+		  Y_READ_OFFSET = 10'd320;
+		  
+
 logic [6:0] address_a[2:0];
 logic [6:0] address_b[2:0];
 logic [31:0] write_data_a [2:0];
@@ -87,6 +93,15 @@ assign Multi_result_long1 = Multi_op_1_1 * Multi_op_1_2;
 assign Multi_result_long2 = Multi_op_2_1 * Multi_op_2_2;
 assign Multi_result_long3 = Multi_op_3_1 * Multi_op_3_2;
 
+//Address Generator
+logic[7:0] S_PRIME_0;
+logic[4:0] S_prime_address;
+logic[4:0] column_counter, row_counter;
+logic[17:0] column_address, row_address;
+logic[8:0] column_block_counter, row_block_counter;
+assign column_address = {column_block_counter, column_counter};
+assign row_address = {row_block_counter, row_counter};
+
 logic [5:0] c_state;
 
 always_comb begin
@@ -99,6 +114,7 @@ always_comb begin
 	
 	case(state)
 	S_LEAD_IN_FETCH_SPRIME_1: begin
+	
 	end
 	endcase
 end
@@ -176,6 +192,12 @@ end
 
 always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 	if (!resetn) begin
+		write_enable_a[0] <= 1'b0;
+		write_enable_a[1] <= 1'b0;	
+		write_enable_a[2] <= 1'b0;	
+		write_enable_b[0] <= 1'b0;
+		write_enable_b[1] <= 1'b0;
+		write_enable_b[2] <= 1'b0;
 		state <= S_M2_IDLE;
 	
 	end else begin
@@ -183,21 +205,50 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 		case(state)
 		
 			S_M2_IDLE: begin
+			if(m2_start == 1)
+				state <= S_LEAD_IN_FETCH_SPRIME_0;
 			end
 			
 			S_LEAD_IN_FETCH_SPRIME_0: begin
+				SRAM_address <= Y_OFFSET + column_address + row_address;
+				column_counter <= column_counter + 5'd1;
+				state <= S_LEAD_IN_FETCH_SPRIME_1;
 			end
 			
 			S_LEAD_IN_FETCH_SPRIME_1: begin
+				SRAM_address <= Y_OFFSET + column_address + row_address;
+				column_counter <= column_counter + 5'd1;
+				state <= S_LEAD_IN_FETCH_SPRIME_2;
 			end
 			
-			S_COMMON_FETCH_SPRIME_2: begin
+			S_LEAD_IN_FETCH_SPRIME_2: begin
+				SRAM_address <= Y_OFFSET + column_address + row_address;
+				column_counter <= column_counter + 5'd1;
+				state <= S_COMMON_FETCH_SPRIME_3;
+			
 			end
 			
-			S_LEAD_OUT_FETCH_SPRIME_3: begin
+			S_COMMON_FETCH_SPRIME_3: begin
+				if (column_counter == 5'd7) begin
+					if (row_counter == 5'd7) begin
+						column_counter <= 5'd0;
+						row_counter <= 5'd0;
+						SRAM_address <= Y_OFFSET + column_address + row_address;
+						address_a[1] <= address_a[1] + 8'd1;
+						write_enable_a[2] <= 1'b0;
+						state <= S_LEAD_OUT_FETCH_SPRIME_4;
+					end else begin
+						column_counter <= 5'd0;
+						row_counter <= row_counter + 5'd1;
+						SRAM_address <= Y_OFFSET + column_address + row_address;
+					end
+				end
 			end
 			
 			S_LEAD_OUT_FETCH_SPRIME_4: begin 
+				write_data_a[1] <= {S_PRIME_0, SRAM_read_data};
+				write_enable_a[1] <= 1'b1;		
+				state <= S_LEAD_IN_COMPUTE_T_0;
 			end
 			
 			S_LEAD_IN_COMPUTE_T_0: begin
