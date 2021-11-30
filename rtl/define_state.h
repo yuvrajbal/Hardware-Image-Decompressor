@@ -4,8 +4,7 @@
 typedef enum logic [2:0] {
 	S_IDLE,
 	S_UART_RX,
-	S_M1,
-	S_M2
+	S_M1
 } top_state_type;
 
 typedef enum logic [1:0] {
@@ -70,30 +69,6 @@ typedef enum logic [6:0] {
 	S_LEAD_OUT_3,
 	S_DONE
 } m1_state_type;
-
-
-typedef enum logic [6:0] {
-	S_M2_IDLE,
-	S_LEAD_IN_FETCH_SPRIME_0,
-	S_LEAD_IN_FETCH_SPRIME_1,
-	S_LEAD_IN_FETCH_SPRIME_2,
-	S_COMMON_FETCH_SPRIME_3,	
-	S_LEAD_OUT_FETCH_SPRIME_4,
-	S_LEAD_IN_COMPUTE_T_0,
-	S_COMMON_COMPUTE_T_1,
-	S_COMMON_COMPUTE_T_2,
-	S_LEAD_OUT_COMPUTE_T_3,
-	S_LEAD_IN_COMPUTE_S_0,
-	S_COMMON_COMPUTE_S_1,
-	S_LEAD_OUT_COMPUTE_S_2,
-	S_COMMON_WRITE_S_0,
-	S_COMMON_WRITE_S_1,
-	S_COMMON_WRITE_S_2,
-	S_COMMON_WRITE_S_3,
-	S_COMMON_WRITE_S_4,
-	S_COMMON_WRITE_S_5,
-	S_COMMON_WRITE_S_6
-} m2_state_type;
 	
 
 parameter 

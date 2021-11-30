@@ -1,5 +1,5 @@
 /*
-Copyright by Henry Ko, Nicola Nicolici, Sartaj Aujla and Yuvraj Bal
+Copyright by Henry Ko and Nicola Nicolici
 Department of Electrical and Computer Engineering
 McMaster University
 Ontario, Canada
@@ -507,6 +507,9 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 
 			SRAM_address <= Y_address + Y_OFFSET;		//location 2 (Y4,Y5)
 			
+			
+			
+			
 			RGB_green <= $signed(RGB_green - Multi_result_long1 - Multi_result_long2) >> 16;//store green pixel value
 			SRAM_we_n <= 1'd1;				//write in next clock cycle
 			
@@ -617,7 +620,12 @@ always_ff @ (posedge CLOCK_50_I or negedge resetn) begin
 			
 			S_LEAD_OUT_3:begin
 			state <= S_LEAD_IN_0;
-			end 		
+			end 
+			
+			
+			
+			
+			
 			default: state <= S_M1_IDLE;
 			
 		endcase
